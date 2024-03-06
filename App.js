@@ -1,31 +1,57 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, SafeAreaView} from 'react-native';
+import {View, Text, SafeAreaView, ActivityIndicator} from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import {WebView} from 'react-native-webview';
 
 const App = () => {
-  const [isConnected, setIsConnected] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     const unsubscribe = NetInfo.addEventListener(state => {
-      setIsConnected(state.isConnected);
+      setTimeout(() => {
+        setIsConnected(state.isConnected);
+        setLoading(false);
+      }, 100);
     });
 
     return () => {
       unsubscribe();
     };
   }, []);
-  console.log(isConnected);
+  const Loader = () => {
+    return (
+      <View
+        style={{
+          backgroundColor: 'white',
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  };
   return (
     <SafeAreaView style={{flex: 1}}>
-      {isConnected ? (
+      {loading === true && isConnected === false ? (
+        <Loader />
+      ) : isConnected === true ? (
         <WebView
+          originWhitelist={['*']}
           source={{uri: 'https://www.pizzeriaenjoy.com/'}}
           ignoreSslError={true}
           cacheEnabled={false}
         />
       ) : (
-        <View>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'white',
+          }}>
           <Text>No Internet Available</Text>
         </View>
       )}
